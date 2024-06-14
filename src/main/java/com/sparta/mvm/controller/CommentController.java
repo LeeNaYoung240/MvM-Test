@@ -17,7 +17,7 @@ import java.util.Map;
 @RestController
 @RequiredArgsConstructor
 public class CommentController {
-
+    //테스트
     public final CommentService service;
     private final CommentService commentService;
 
