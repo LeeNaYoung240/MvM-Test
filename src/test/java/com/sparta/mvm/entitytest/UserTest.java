@@ -92,7 +92,7 @@ public class UserTest {
 
         @DisplayName("이름 공백 예외 발생 테스트")
         @Test
-        void createInvalidUserEntityBlankName() {
+        void InvalidBlankName() {
             // given
             SignupRequestDto signupRequestDto = new SignupRequestDto();
             signupRequestDto.setUsername("dlskdud123");
@@ -107,7 +107,7 @@ public class UserTest {
 
         @DisplayName("이메일 형식 예외 발생 테스트")
         @Test
-        void createInvalidUserEntityInvalidEmailFormat() {
+        void InvalidEmailFormat() {
             // given
             SignupRequestDto signupRequestDto = new SignupRequestDto();
             signupRequestDto.setUsername("dlskdud123");

@@ -65,7 +65,7 @@ public class PostTest {
 
     @DisplayName("Post Entity 사용자 설정 예외 테스트")
     @Test
-    void setUserForPostEntityWithNullUser() {
+    void setUserException() {
         // given
         Post newPost = new Post("포스트 테스트");
 

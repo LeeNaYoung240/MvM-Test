@@ -34,6 +34,17 @@ public class Comment extends Timestamped {
     }
 
     public void setUser(User user) {
+        if (user == null) {
+            throw new IllegalArgumentException("사용자 정보는 필수입니다.");
+        }
         this.user = user;
+    }
+
+    public void setPost(Post newPost) {
+        if(newPost == null)
+        {
+            throw new IllegalArgumentException("포스트 정보는 필수입니다.");
+        }
+        this.post = post;
     }
 }
