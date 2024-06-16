@@ -51,10 +51,19 @@ public class User extends Timestamped {
     public User(SignupRequestDto signupRequestDto) {
         this.username = signupRequestDto.getUsername();
         this.password = signupRequestDto.getPassword();
+        if (signupRequestDto.getName().trim().isEmpty()) {
+            throw new IllegalArgumentException("이름은 공백일 수 없습니다.");
+        }
         this.name = signupRequestDto.getName();
+        if (!isValidEmail(signupRequestDto.getEmail())) {
+            throw new IllegalArgumentException("올바른 형식의 이메일 주소여야 합니다.");
+        }
         this.email = signupRequestDto.getEmail();
         this.lineIntro = signupRequestDto.getLineIntro();
         this.userStatus = UserStatusEnum.USER_NORMAL;
+    }
+    private boolean isValidEmail(String email) {
+        return email.matches("[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}");
     }
 
     @OneToMany(mappedBy = "user")
