@@ -22,7 +22,7 @@ public class SignupRequestDto {
     @NotBlank(message = "이름은 공백일 수 없습니다.")
     private String name;
     private String lineIntro;
-    @Email
+    @Email(message = "올바른 형식의 이메일 주소여야 합니다")
     @NotBlank(message = "email은 공백일 수 없습니다.")
     private String email;
 }

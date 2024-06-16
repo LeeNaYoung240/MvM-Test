@@ -4,7 +4,7 @@ import com.sparta.mvm.dto.SignupRequestDto;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
-import jakarta.validation.ValidatorFactory;
+import jakarta.validation.*;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -38,6 +38,10 @@ public class SignupRequestDtoTest {
 
             // when
             Set<ConstraintViolation<SignupRequestDto>> violations = validator.validate(signupRequestDto);
+            for (ConstraintViolation<SignupRequestDto> violation : violations) {
+                System.out.println("violation = " + violation);
+                System.out.println("violation.message = " + violation.getMessage());
+            }
 
             // then
             assertThat(violations).isEmpty();
@@ -55,6 +59,10 @@ public class SignupRequestDtoTest {
 
             // when
             Set<ConstraintViolation<SignupRequestDto>> violations = validator.validate(signupRequestDto);
+            for (ConstraintViolation<SignupRequestDto> violation : violations) {
+                System.out.println("violation = " + violation);
+                System.out.println("violation.message = " + violation.getMessage());
+            }
 
             // then
             assertThat(violations).hasSize(3);
@@ -78,6 +86,10 @@ public class SignupRequestDtoTest {
 
             // when
             Set<ConstraintViolation<SignupRequestDto>> violations = validator.validate(signupRequestDto);
+            for (ConstraintViolation<SignupRequestDto> violation : violations) {
+                System.out.println("violation = " + violation);
+                System.out.println("violation.message = " + violation.getMessage());
+            }
 
             // then
             assertThat(violations).hasSize(3);
@@ -100,6 +112,10 @@ public class SignupRequestDtoTest {
 
             // when
             Set<ConstraintViolation<SignupRequestDto>> violations = validator.validate(signupRequestDto);
+            for (ConstraintViolation<SignupRequestDto> violation : violations) {
+                System.out.println("violation = " + violation);
+                System.out.println("violation.message = " + violation.getMessage());
+            }
 
             // then
             assertThat(violations).hasSize(1);
@@ -114,11 +130,16 @@ public class SignupRequestDtoTest {
             SignupRequestDto signupRequestDto = new SignupRequestDto();
             signupRequestDto.setUsername("dlskdud123");
             signupRequestDto.setPassword("dlskdud12!");
-            signupRequestDto.setName(" ");
+            signupRequestDto.setName("");
             signupRequestDto.setEmail("dlskdud@test.com");
 
             // when
             Set<ConstraintViolation<SignupRequestDto>> violations = validator.validate(signupRequestDto);
+            for (ConstraintViolation<SignupRequestDto> violation : violations) {
+                System.out.println("violation = " + violation);
+                System.out.println("violation.message = " + violation.getMessage());
+            }
+
 
             // then
             assertThat(violations).hasSize(1);
