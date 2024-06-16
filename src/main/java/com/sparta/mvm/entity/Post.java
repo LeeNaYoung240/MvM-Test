@@ -30,6 +30,9 @@ public class Post extends Timestamped {
     }
 
     public void setUser(User user) {
+        if (user == null) {
+            throw new IllegalArgumentException("사용자 정보는 필수입니다.");
+        }
         this.user = user;
     }
 }
