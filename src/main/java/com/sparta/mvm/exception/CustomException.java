@@ -4,7 +4,11 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
 @Getter
-@RequiredArgsConstructor
 public class CustomException extends RuntimeException {
     private final ErrorEnum statusEnum;
+
+    public CustomException(ErrorEnum statusEnum) {
+        super(statusEnum.getMsg());
+        this.statusEnum = statusEnum;
+    }
 }
