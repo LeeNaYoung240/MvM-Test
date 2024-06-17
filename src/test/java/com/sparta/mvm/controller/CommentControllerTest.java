@@ -2,14 +2,14 @@ package com.sparta.mvm.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sparta.mvm.config.SecurityConfig;
-import com.sparta.mvm.dto.PostRequestDto;
-import com.sparta.mvm.dto.PostResponseDto;
+import com.sparta.mvm.dto.CommentRequestDto;
+import com.sparta.mvm.dto.CommentResponseDto;
 import com.sparta.mvm.entity.User;
 import com.sparta.mvm.exception.CustomException;
 import com.sparta.mvm.exception.ErrorEnum;
 import com.sparta.mvm.mvc.MockSpringSecurityFilter;
 import com.sparta.mvm.security.UserDetailsImpl;
-import com.sparta.mvm.service.PostService;
+import com.sparta.mvm.service.CommentService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -44,7 +44,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(
-        controllers = PostController.class,
+        controllers = CommentController.class,
         excludeFilters = {
                 @ComponentScan.Filter(
                         type = FilterType.ASSIGNABLE_TYPE,
@@ -54,7 +54,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 )
 @WithMockUser
 @MockBean(JpaMetamodelMappingContext.class)
-public class PostControllerTest {
+class CommentControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -62,7 +62,7 @@ public class PostControllerTest {
     private Principal mockPrincipal;
 
     @MockBean
-    private PostService postService;
+    private CommentService commentService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -89,37 +89,35 @@ public class PostControllerTest {
         mockPrincipal = new UsernamePasswordAuthenticationToken(userDetails, user.getPassword(), userDetails.getAuthorities());
     }
 
-
     @Test
-    @DisplayName("게시글 등록 테스트")
-    void createPost() throws Exception {
+    @DisplayName("댓글 등록 테스트")
+    void createComment() throws Exception {
         // given
         mockUserSetup();
+        long postId = 1L;
 
-        PostRequestDto requestDto = new PostRequestDto("내용 테스트");
-        PostResponseDto responseDto = PostResponseDto.builder()
-                .msg("게시글 등록 성공 🎉")
+        CommentRequestDto requestDto = new CommentRequestDto("댓글 테스트");
+        CommentResponseDto responseDto = CommentResponseDto.builder()
+                .msg("댓글 등록 성공 💌")
                 .statusCode(200)
                 .id(1L)
-                .username("user1")
-                .contents("내용 테스트")
+                .comments("댓글 테스트")
                 .build();
 
-        given(postService.save(ArgumentMatchers.any(PostRequestDto.class)))
+        given(commentService.save(ArgumentMatchers.eq(postId), ArgumentMatchers.any(CommentRequestDto.class)))
                 .willReturn(responseDto);
 
         // when
-        MvcResult result = mockMvc.perform(post("/posts")
+        MvcResult result = mockMvc.perform(post("/posts/{postId}/comments", postId)
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto)))
                 .andExpect(status().isCreated())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.msg", is("게시글 등록 성공 🎉")))
+                .andExpect(jsonPath("$.msg", is("댓글 등록 성공 💌")))
                 .andExpect(jsonPath("$.statusCode", is(200)))
                 .andExpect(jsonPath("$.id", is(1)))
-                .andExpect(jsonPath("$.username", is("user1")))
-                .andExpect(jsonPath("$.contents", is("내용 테스트")))
+                .andExpect(jsonPath("$.comments", is("댓글 테스트")))
                 .andReturn();
 
         // then
@@ -128,27 +126,29 @@ public class PostControllerTest {
     }
 
     @Test
-    @DisplayName("게시글 전체 조회 테스트")
-    void getAllPosts() throws Exception {
+    @DisplayName("댓글 조회 테스트")
+    void getAllComments() throws Exception {
         // Given
         mockUserSetup();
-        PostResponseDto responseDto = PostResponseDto.builder()
+        CommentResponseDto responseDto = CommentResponseDto.builder()
+                .msg("댓글 조회 성공 🎉")
+                .statusCode(200)
                 .id(1L)
-                .contents("내용 테스트")
-                .username("user1")
+                .comments("댓글 테스트")
                 .build();
-        List<PostResponseDto> responseDtoList = Collections.singletonList(responseDto);
-        given(postService.getAll()).willReturn(responseDtoList);
+        List<CommentResponseDto> responseDtoList = Collections.singletonList(responseDto);
+        given(commentService.getAll()).willReturn(responseDtoList);
 
         // When
-        MvcResult result = mockMvc.perform(get("/posts")
+        MvcResult result = mockMvc.perform(get("/comments")
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.newsFeed[0].id", is(1)))
-                .andExpect(jsonPath("$.newsFeed[0].contents", is("내용 테스트")))
-                .andExpect(jsonPath("$.newsFeed[0].username", is("user1")))
+                .andExpect(jsonPath("$.newFeed_Comment[0].id", is(1)))
+                .andExpect(jsonPath("$.newFeed_Comment[0].comments", is("댓글 테스트")))
+                .andExpect(jsonPath("$.newFeed_Comment[0].statusCode", is(200)))
+                .andExpect(jsonPath("$.newFeed_Comment[0].msg", is("댓글 조회 성공 🎉")))
                 .andReturn();
 
         // Then
@@ -158,69 +158,32 @@ public class PostControllerTest {
 
 
     @Test
-    @DisplayName("게시글 부분 조회 테스트")
-    void getPostById() throws Exception {
+    @DisplayName("댓글 수정 테스트")
+    void updateComment() throws Exception {
         // Given
         mockUserSetup();
-        long postId = 1L;
-        PostRequestDto requestDto = new PostRequestDto("내용 테스트");
-        PostResponseDto responseDto = PostResponseDto.builder()
-                .id(postId)
-                .contents("내용 테스트")
-                .username("user1")
-                .msg("게시글 조회 성공 🎉")
+        long commentId = 1L;
+        CommentRequestDto requestDto = new CommentRequestDto("댓글 테스트");
+        CommentResponseDto responseDto = CommentResponseDto.builder()
+                .msg("댓글 수정 성공 🎉")
                 .statusCode(200)
+                .id(1L)
+                .comments("댓글 테스트")
                 .build();
 
-        given(postService.findById(postId)).willReturn(responseDto);
+        given(commentService.update(ArgumentMatchers.eq(commentId), ArgumentMatchers.any(CommentRequestDto.class))).willReturn(responseDto);
 
         // When
-        MvcResult result = mockMvc.perform(get("/posts/{postId}", postId)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(requestDto)))
-                .andExpect(status().isOk())
-                .andExpect(status().isOk())
-                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
-                .andExpect(jsonPath("$.id", is(1)))
-                .andExpect(jsonPath("$.contents", is("내용 테스트")))
-                .andExpect(jsonPath("$.username", is("user1")))
-                .andExpect(jsonPath("$.msg", is("게시글 조회 성공 🎉")))
-                .andReturn();
-
-        // Then
-        String content = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
-        System.out.println("Response: " + content);
-    }
-
-    @Test
-    @DisplayName("게시글 수정 테스트")
-    void updatePost() throws Exception {
-        // Given
-        mockUserSetup();
-        long postId = 1L;
-        PostRequestDto requestDto = new PostRequestDto("내용 테스트");
-        PostResponseDto responseDto = PostResponseDto.builder()
-                .id(postId)
-                .contents("내용 테스트")
-                .username("user1")
-                .msg("게시글 수정 성공 🎉")
-                .statusCode(200)
-                .build();
-
-        given(postService.update(eq(postId), any(PostRequestDto.class))).willReturn(responseDto);
-
-        // When
-        MvcResult result = mockMvc.perform(put("/posts/{postId}", postId)
+        MvcResult result = mockMvc.perform(put("/comments/{commentId}", commentId)
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto)))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id", is(1)))
-                .andExpect(jsonPath("$.contents", is("내용 테스트")))
-                .andExpect(jsonPath("$.username", is("user1")))
-                .andExpect(jsonPath("$.msg", is("게시글 수정 성공 🎉")))
+                .andExpect(jsonPath("$.comments", is("댓글 테스트")))
+                .andExpect(jsonPath("$.msg", is("댓글 수정 성공 🎉")))
+                .andExpect(jsonPath("$.statusCode", is(200)))
                 .andReturn();
 
         // Then
@@ -229,60 +192,63 @@ public class PostControllerTest {
     }
 
     @Test
-    @DisplayName("게시글 삭제 테스트")
-    void deletePost() throws Exception {
+    @DisplayName("댓글 삭제 테스트")
+    void deleteComment() throws Exception {
         // Given
         mockUserSetup();
-        long postId = 1L;
+        long commentId = 1L;
 
         // When
-        MvcResult result =  mockMvc.perform(delete("/posts/{postId}", postId)
+        MvcResult result = mockMvc.perform(delete("/comments/{commentId}", commentId)
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.statusCode", is(200)))
-                .andExpect(jsonPath("$.msg", containsString("게시글 삭제 성공 🎉")))
+                .andExpect(jsonPath("$.msg", containsString("댓글 삭제 성공 🎉")))
                 .andReturn();
 
         // Then
-        verify(postService, times(1)).delete(postId);
-        String content = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
-        System.out.println("Response: " + content);
-
-    }
-
-    @Test
-    @DisplayName("게시글 조회 실패 테스트")
-    void getPostByIdFail() throws Exception {
-        // Given
-        mockUserSetup();
-        given(postService.findById(1L)).willThrow(new CustomException(ErrorEnum.BAD_POSTID));
-
-        // When
-        MvcResult result = mockMvc.perform(get("/posts/{postId}", 1L)
-                        .accept(MediaType.APPLICATION_JSON)
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.statusCode").value(ErrorEnum.BAD_POSTID.getStatusCode()))
-                .andExpect(jsonPath("$.msg").value(ErrorEnum.BAD_POSTID.getMsg()))
-                .andReturn();
-
-        // Then
+        verify(commentService, times(1)).delete(commentId);
         String content = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
         System.out.println("Response: " + content);
     }
 
+
     @Test
-    @DisplayName("게시글 수정 실패 테스트")
-    void updatePostFail() throws Exception {
+    @DisplayName("댓글 조회 실패 테스트")
+    void getAllCommentsFail() throws Exception {
         // Given
         mockUserSetup();
-        PostRequestDto requestDto = new PostRequestDto("내용 테스트");
-        given(postService.update(eq(1L), any(PostRequestDto.class))).willThrow(new CustomException(ErrorEnum.BAD_AUTH_PUT));
+        given(commentService.getAll()).willReturn(Collections.emptyList());
 
         // When
-        MvcResult result = mockMvc.perform(put("/posts/{postId}", 1L)
+        MvcResult result = mockMvc.perform(get("/comments")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().contentType(MediaType.APPLICATION_JSON))
+                .andExpect(jsonPath("$.statusCode", is(200)))
+                .andExpect(jsonPath("$.msg", is("먼저 댓글을 작성해 보세요 📝")))
+                .andReturn();
+
+        // Then
+        String content = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
+        System.out.println("Response: " + content);
+    }
+
+
+    @Test
+    @DisplayName("댓글 수정 실패 테스트")
+    void updateCommentFail() throws Exception {
+        // Given
+        mockUserSetup();
+        long commentId = 1L;
+        CommentRequestDto requestDto = new CommentRequestDto("내용 테스트");
+        given(commentService.update(eq(commentId), any(CommentRequestDto.class))).willThrow(new CustomException(ErrorEnum.BAD_AUTH_PUT));
+
+        // When
+        MvcResult result = mockMvc.perform(put("/comments/{commentId}", commentId)
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto)))
@@ -296,16 +262,16 @@ public class PostControllerTest {
         System.out.println("Response: " + content);
     }
 
-
     @Test
-    @DisplayName("게시글 삭제 실패 테스트")
-    void deletePostFail() throws Exception {
+    @DisplayName("댓글 삭제 실패 테스트")
+    void deleteCommentFail() throws Exception {
         // Given
         mockUserSetup();
-        doThrow(new CustomException(ErrorEnum.BAD_AUTH_DELETE)).when(postService).delete(1L);
+        long commentId = 1L;
+        doThrow(new CustomException(ErrorEnum.BAD_AUTH_DELETE)).when(commentService).delete(commentId);
 
         // When
-        MvcResult result = mockMvc.perform(delete("/posts/{postId}", 1L)
+        MvcResult result = mockMvc.perform(delete("/comments/{commentId}", commentId)
                         .accept(MediaType.APPLICATION_JSON)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isForbidden())
@@ -317,4 +283,6 @@ public class PostControllerTest {
         String content = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
         System.out.println("Response: " + content);
     }
+
+
 }
