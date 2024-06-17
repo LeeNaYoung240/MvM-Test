@@ -15,7 +15,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({CustomException.class})
     protected ResponseEntity handleCustomException(CustomException ex) {
-        return ResponseEntity.ok().body(CommonResponse.builder()
+        HttpStatus status = ex.getStatusEnum() == ErrorEnum.BAD_POSTID ? HttpStatus.NOT_FOUND : HttpStatus.FORBIDDEN;
+        return ResponseEntity.status(status).body(CommonResponse.builder()
                 .statusCode(ex.getStatusEnum().getStatusCode())
                 .msg(ex.getStatusEnum().getMsg())
                 .build());
@@ -30,7 +31,6 @@ public class GlobalExceptionHandler {
                 .build());
     }
 
-    // UserController signup 예외처리 (테스트)
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseEntity<CommonResponse> handleValidationExceptions(IllegalArgumentException ex) {
@@ -40,7 +40,6 @@ public class GlobalExceptionHandler {
                 .build());
     }
 
-    // 나머지 에러
     @ExceptionHandler(Exception.class)
     protected ResponseEntity<CommonResponse> handleException(Exception ex) {
         return ResponseEntity.ok().body(CommonResponse.builder()
