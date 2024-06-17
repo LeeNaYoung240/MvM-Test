@@ -3,16 +3,17 @@ package com.sparta.mvm.entity;
 import com.sparta.mvm.dto.ProfileRequestDto;
 import com.sparta.mvm.dto.SignupRequestDto;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
 @Getter
+@Setter
 @Table(name = "metromusic")
 @NoArgsConstructor
 public class User extends Timestamped {
@@ -69,6 +70,7 @@ public class User extends Timestamped {
     @OneToMany(mappedBy = "user")
     private List<Post> post;
 
+    @Builder
     public User(String username, String password, String name, String email, String lineIntro, UserStatusEnum userStatusEnum) {
         this.username = username;
         this.password = password;

@@ -34,6 +34,7 @@ public class UserTest {
         signupRequestDto.setName("이나영");
         signupRequestDto.setEmail("dlskdud@test.com");
 
+
         // when
         User newUser = new User(signupRequestDto);
 
