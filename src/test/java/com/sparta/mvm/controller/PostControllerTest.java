@@ -1,7 +1,6 @@
-package com.sparta.mvm.controllertest;
-import static org.mockito.ArgumentMatchers.*;
+package com.sparta.mvm.controller;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sparta.mvm.controller.PostController;
 import com.sparta.mvm.dto.PostRequestDto;
 import com.sparta.mvm.dto.PostResponseDto;
 import com.sparta.mvm.exception.CustomException;
@@ -28,11 +27,14 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @WebMvcTest(PostController.class)
 @WithMockUser
@@ -140,7 +142,7 @@ public class PostControllerTest {
         MvcResult result = mockMvc.perform(get("/posts/{postId}", postId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(requestDto)))
-                 .andExpect(status().isOk())
+                .andExpect(status().isOk())
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.id", is(1)))
@@ -200,7 +202,7 @@ public class PostControllerTest {
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
                 .andExpect(jsonPath("$.statusCode", is(200)))
                 .andExpect(jsonPath("$.msg", containsString("게시글 삭제 성공 🎉")))
-                        .andReturn();
+                .andReturn();
 
         // Then
         verify(postService, times(1)).delete(postId);

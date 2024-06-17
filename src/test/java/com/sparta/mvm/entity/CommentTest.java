@@ -1,15 +1,12 @@
-package com.sparta.mvm.entitytest;
+package com.sparta.mvm.entity;
 
-import com.sparta.mvm.entity.Comment;
-import com.sparta.mvm.entity.Post;
-import com.sparta.mvm.entity.User;
-import com.sparta.mvm.entity.UserStatusEnum;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class CommentTest {
 
@@ -78,8 +75,9 @@ public class CommentTest {
         comment.setPost(newPost);
 
         // then
-        assertThat(comment.getPost()).isEqualTo(newPost);
+        assertThat(comment.getPost()).usingRecursiveComparison().isEqualTo(newPost);
     }
+
 
     @Nested
     @DisplayName("Comment Entity 설정 예외 테스트")

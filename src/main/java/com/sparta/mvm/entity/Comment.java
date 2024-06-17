@@ -41,10 +41,9 @@ public class Comment extends Timestamped {
     }
 
     public void setPost(Post newPost) {
-        if(newPost == null)
-        {
+        if (newPost == null) {
             throw new IllegalArgumentException("포스트 정보는 필수입니다.");
         }
-        this.post = post;
+        this.post = newPost;
     }
 }
