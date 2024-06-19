@@ -253,7 +253,21 @@
 
 <br>
 
-# 📸 video
+
+## 🩹 개선 사항
+
+<details>
+<summary>테스트 코드 추가</summary>
+<div markdown="1">
+
+<br>
+
+- 개인 : Controller, Service, Entity, DTO 레이어에 맞는 단위 테스트 작성
+
+
+</div>
+</details>
+
 
 
 
